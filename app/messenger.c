@@ -49,6 +49,7 @@ const uint8_t MSG_BUTTON_EVENT_LONG =  MSG_BUTTON_STATE_HELD;
 const uint8_t MAX_MSG_LENGTH = PAYLOAD_LENGTH - 1;
 
 uint16_t TONE2_FREQ;
+uint8_t  g_nMsgActiveVFO;
 
 #define NEXT_CHAR_DELAY 100 // 10ms tick
 
@@ -194,9 +195,32 @@ void moveUP(char (*rxMessages)[PAYLOAD_LENGTH + 2]) {
 	memset(rxMessages[3], 0, sizeof(rxMessages[3]));
 }
 
+
+//changes by df1cwq
+//when MSG_TX_VFO != Current, select the configgured VFO to send the 
+//message. The current active VFO is stored in a global variable, to
+//restore the TX VFO after transmission...
+void MSG_SelectTxVFO()
+{
+	g_nMsgActiveVFO = gEeprom.TX_VFO;
+
+	if(gEeprom.MESSENGER_CONFIG.data.txvfo != 0)
+	{
+		gEeprom.TX_VFO = gEeprom.MESSENGER_CONFIG.data.txvfo - 1;
+
+		gFlagReconfigureVfos  = true;
+    	gScheduleDualWatch    = true;
+
+		RADIO_SelectVfos();
+	};
+}
+
+
 void MSG_SendPacket() {
 
 	if ( msgStatus != READY ) return;
+
+	MSG_SelectTxVFO();
 
 	RADIO_PrepareTX();
 
@@ -272,6 +296,18 @@ void MSG_SendPacket() {
 
 	} else {
 		AUDIO_PlayBeep(BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL);
+	}
+
+
+	//restore VFO
+	if(g_nMsgActiveVFO != gEeprom.TX_VFO) 
+	{
+		gEeprom.TX_VFO = g_nMsgActiveVFO;
+
+		gFlagReconfigureVfos  = true;
+    	gScheduleDualWatch    = true;
+
+		RADIO_SelectVfos();
 	}
 }
 

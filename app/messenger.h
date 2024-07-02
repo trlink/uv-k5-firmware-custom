@@ -45,6 +45,7 @@ extern char cMessage[PAYLOAD_LENGTH];
 extern char rxMessage[4][PAYLOAD_LENGTH + 2];
 extern uint8_t hasNewMessage;
 extern uint8_t keyTickCounter;
+extern uint8_t g_nMsgActiveVFO;
 
 typedef enum MsgStatus {
     READY,
@@ -88,7 +89,7 @@ typedef union {
       encrypt    :1, // determines whether outgoing messages will be encrypted
       unused     :1,
       modulation :2, // determines FSK modulation type
-      unused2    :2;
+      txvfo      :2; // current = 0, 1 = A, 2 = B
   } data;
   uint8_t __val;
 } MessengerConfig;
@@ -104,6 +105,9 @@ void MSG_SendAck();
 void MSG_HandleReceive();
 void MSG_Send(const char *cMessage);
 void MSG_ConfigureFSK(bool rx);
+
+
+void MSG_SelectTxVFO();
 
 #endif
 

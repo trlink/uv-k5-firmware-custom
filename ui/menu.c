@@ -125,6 +125,7 @@ const t_menu_item MenuList[] =
 	{"MsgRx",  VOICE_ID_INVALID,                       MENU_MSG_RX        }, // messenger rx
 	{"MsgAck", VOICE_ID_INVALID,                       MENU_MSG_ACK       }, // messenger respond ACK
 	{"MsgMod", VOICE_ID_INVALID,                       MENU_MSG_MODULATION}, // messenger modulation
+	{"MsgVFO", 0,                       			   MENU_MSG_VFO	 	  }, // messenger tx vfo
 #endif
 	{"Sql",    VOICE_ID_SQUELCH,                       MENU_SQL           },
 	// hidden menu items from here on
@@ -192,6 +193,13 @@ const char gSubMenu_SAVE[][4] =
 		"FSK 450",
 		"FSK 700",
 		"AFSK 1.2K"
+	};
+
+	const char gSubMenu_MSG_TXVFO[][10] =
+	{
+		"CURRENT",
+		"A",
+		"B"
 	};
 #endif
 
@@ -783,6 +791,10 @@ void UI_DisplayMenu(void)
 			#ifdef ENABLE_MESSENGER
 				case MENU_MSG_MODULATION:
 					strcpy(String, gSubMenu_MSG_MODULATION[gSubMenuSelection]);
+					break;
+
+				case MENU_MSG_VFO:
+					strcpy(String, gSubMenu_MSG_TXVFO[gSubMenuSelection]);
 					break;
 			#endif
 
