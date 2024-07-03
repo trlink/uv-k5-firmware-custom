@@ -75,6 +75,20 @@ void FM_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 {	
 	uint8_t state = bKeyPressed + 2 * bKeyHeld;
 
+	if(Key == KEY_F)
+	{
+		if (bKeyHeld && gEeprom.KEY_LOCK)
+		{	
+			// keypad is locked, tell the user
+			gEeprom.KEY_LOCK = false;
+			gKeypadLocked  = 0;      // 2 seconds
+			gUpdateDisplay = true;
+			gUpdateStatus  = true;
+
+			return;
+		};
+	};
+
 	if (state == 0) {
 		switch (Key)
 		{	
@@ -87,6 +101,7 @@ void FM_ProcessKeys(KEY_Code_t Key, bool bKeyPressed, bool bKeyHeld)
 			case KEY_EXIT:
 				Key_EXIT();
 				break;
+		
 			default:
 				gBeepToPlay = BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL;
 				break;
