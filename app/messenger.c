@@ -224,13 +224,14 @@ void MSG_SendPacket() {
 
 	RADIO_PrepareTX();
 
-	if(RADIO_GetVfoState() != VFO_STATE_NORMAL){
+	if(RADIO_GetVfoState() != VFO_STATE_NORMAL)
+	{
 		gRequestDisplayScreen = DISPLAY_MAIN;
 		return;
 	} 
 
-	if ( strlen((char *)dataPacket.data.payload) > 0) {
-
+	if ( strlen((char *)dataPacket.data.payload) > 0) 
+	{
 		msgStatus = SENDING;
 
 		RADIO_SetVfoState(VFO_STATE_NORMAL);
@@ -238,28 +239,34 @@ void MSG_SendPacket() {
 		BK4819_ToggleGpioOut(BK4819_GPIO5_PIN1_RED, true);
 
 		// display sent message (before encryption)
-		if (dataPacket.data.header != ACK_PACKET) {
+		if (dataPacket.data.header != ACK_PACKET) 
+		{
 			moveUP(rxMessage);
 			sprintf(rxMessage[3], "> %s", dataPacket.data.payload);
+
 			memset(lastcMessage, 0, sizeof(lastcMessage));
 			memcpy(lastcMessage, dataPacket.data.payload, PAYLOAD_LENGTH);
+
 			cIndex = 0;
 			prevKey = 0;
 			prevLetter = 0;
+
 			memset(cMessage, 0, sizeof(cMessage));
 		}
 
 		#ifdef ENABLE_ENCRYPTION
-			if(dataPacket.data.header == ENCRYPTED_MESSAGE_PACKET){
+			if(dataPacket.data.header == ENCRYPTED_MESSAGE_PACKET)
+			{
+				memset(dataPacket.data.nonce, 0, sizeof(dataPacket.data.nonce));
 
-				CRYPTO_Random(dataPacket.data.nonce, NONCE_LENGTH);
+				CRYPTO_Random(&dataPacket.data.nonce, NONCE_LENGTH);
 
 				CRYPTO_Crypt(
-					dataPacket.data.payload,
+					&dataPacket.data.payload,
 					PAYLOAD_LENGTH,
-					dataPacket.data.payload,
+					&dataPacket.data.payload,
 					&dataPacket.data.nonce,
-					gEncryptionKey,
+					&gEncryptionKey,
 					256
 				);
 			}
@@ -293,8 +300,10 @@ void MSG_SendPacket() {
 		MSG_ClearPacketBuffer();
 
 		msgStatus = READY;
+	} 
+	else 
+	{
 
-	} else {
 		AUDIO_PlayBeep(BEEP_500HZ_60MS_DOUBLE_BEEP_OPTIONAL);
 	}
 
@@ -328,31 +337,36 @@ void MSG_StorePacket(const uint16_t interrupt_bits) {
 
 	//UART_printf("\nMSG : S%i, F%i, E%i | %i", rx_sync, rx_fifo_almost_full, rx_finished, interrupt_bits);
 
-	if (rx_sync) {
+	if (rx_sync) 
+	{
 		#ifdef ENABLE_MESSENGER_FSK_MUTE
 			// prevent listening to fsk data and squelch (kamilsss655)
 			// CTCSS codes seem to false trigger the rx_sync
 			if(gCurrentCodeType == CODE_TYPE_OFF)
 				AUDIO_AudioPathOff();
 		#endif
+
 		gFSKWriteIndex = 0;
 		MSG_ClearPacketBuffer();
 		msgStatus = RECEIVING;
 	}
 
-	if (rx_fifo_almost_full && msgStatus == RECEIVING) {
-
+	if (rx_fifo_almost_full && msgStatus == RECEIVING) 
+	{
 		const uint16_t count = BK4819_ReadRegister(BK4819_REG_5E) & (7u << 0);  // almost full threshold
-		for (uint16_t i = 0; i < count; i++) {
+
+		for (uint16_t i = 0; i < count; i++) 
+		{
 			const uint16_t word = BK4819_ReadRegister(BK4819_REG_5F);
+
 			if (gFSKWriteIndex < sizeof(dataPacket.serializedArray))
 				dataPacket.serializedArray[gFSKWriteIndex++] = (word >> 0) & 0xff;
+
 			if (gFSKWriteIndex < sizeof(dataPacket.serializedArray))
 				dataPacket.serializedArray[gFSKWriteIndex++] = (word >> 8) & 0xff;
 		}
 
 		SYSTEM_DelayMs(10);
-
 	}
 
 	if (rx_finished) {

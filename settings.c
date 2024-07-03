@@ -285,6 +285,7 @@ void SETTINGS_SaveEncryptionKey()
 {
 	EEPROM_WriteBuffer(0x0F30, gEeprom.ENC_KEY, true);
 	EEPROM_WriteBuffer(0x0F38, gEeprom.ENC_KEY + 8, true);
+	
 	gRecalculateEncKey = true;
 }
 #endif

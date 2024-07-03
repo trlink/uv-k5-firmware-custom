@@ -1319,8 +1319,12 @@ void APP_TimeSlice500ms(void)
 	#endif
 
 	#ifdef ENABLE_ENCRYPTION
-		if(gRecalculateEncKey){
-			CRYPTO_Generate256BitKey(gEeprom.ENC_KEY, gEncryptionKey, sizeof(gEeprom.ENC_KEY));
+		if(gRecalculateEncKey)
+		{
+			memset(gEncryptionKey, 0, sizeof(gEncryptionKey));
+
+			CRYPTO_Generate256BitKey(gEeprom.ENC_KEY, &gEncryptionKey, sizeof(gEeprom.ENC_KEY));
+
 			gRecalculateEncKey = false;
 		}
 	#endif
